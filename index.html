@@ -107,7 +107,10 @@
 </head>
 <body>
   <h1>刺青報價小工具</h1>
-  <div class="sub">公式參考 Excel：尺寸 × 80 ＋ 部位難度 / 施作 / 設計 × 300。若原始報價低於 2000，會提示加入開針費 1500 後的價格。</div>
+  <div class="sub">
+    公式參考 Excel：尺寸 × 80 ＋ 部位難度 / 施作 / 設計 × 300。
+    若原始報價低於 2000，會提示加入開針費 1500 後的價格。
+  </div>
 
   <!-- 基本資訊 -->
   <div class="card">
@@ -145,7 +148,9 @@
 
   <!-- 難度與設計 -->
   <div class="card">
-    <div class="card-title">難度與設計參數 <span class="badge">和 Excel 對應</span></div>
+    <div class="card-title">
+      難度與設計參數 <span class="badge">和 Excel 對應</span>
+    </div>
 
     <label>
       部位難度（0～3 自訂）
@@ -238,7 +243,10 @@
     }
 
     function formatMoney(x) {
-      return x.toFixed(0).replace(/\B?(?=(\d{3})+(?!\d))/g, ",");
+      // ✅ 這行之前我打錯，現在是正常可用的版本
+      return x
+        .toFixed(0)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     // 長 × 寬 → 自動帶入面積
@@ -256,4 +264,107 @@
       }
     }
 
-    document.getElementById("lengt
+    // 監聽長、寬輸入
+    document.getElementById("length").addEventListener("input", updateAreaFromLengthWidth);
+    document.getElementById("width").addEventListener("input", updateAreaFromLengthWidth);
+
+    function calculate() {
+      // 再保險一次長×寬
+      updateAreaFromLengthWidth();
+
+      var name      = document.getElementById("name").value || "未命名圖案";
+      var size      = num("size");     // B
+      var percent   = num("percent");  // C
+      var partDiff  = num("partDiff");// E
+
+      var complexity = num("complexity"); // G
+      var realism    = num("realism");    // H
+      var color      = num("color");      // I
+      var redesign   = num("redesign");   // J
+      var design     = num("design");     // K
+
+      var B1         = num("constB1");    // 80
+      var D1         = num("constD1");    // 150
+      var unitPart   = num("constPart");  // 300
+      var unitDiff   = num("constDiff");  // 300
+      var unitDesign = num("constDiff");  // 同一個
+
+      if (size <= 0 || percent <= 0) {
+        alert("請至少填寫『尺寸』與『尺寸比例(%)』。");
+        return;
+      }
+
+      // F = 複雜度 + 寫實度 + 色彩 + 改圖
+      var totalDiff = complexity + realism + color + redesign;
+
+      // 尺寸 / 設計面積調整
+      var sizeAdj, designAdj;
+      if (size < D1) {
+        sizeAdj   = totalDiff;
+        designAdj = design;
+      } else {
+        sizeAdj   = (size / D1) * totalDiff;
+        designAdj = (size / D1) * design;
+      }
+
+      // 四個主構成
+      var baseCost   = size * B1 * percent;
+      var partCost   = partDiff * unitPart;
+      var diffCost   = sizeAdj * unitDiff;
+      var designCost = designAdj * unitDesign;
+
+      // M：原始計算報價（未含開針費）
+      var M = baseCost + partCost + diffCost + designCost;
+
+      // 若低於 2000，加入開針費 1500 的參考價
+      var openFee = 0;
+      var openText = "";
+
+      if (M > 0 && M < 2000) {
+        openFee = 1500;
+        openText =
+          "若加入開針費 1500，金額為：$" +
+          formatMoney(M + openFee) +
+          "（低於 2000 建議加開針費）";
+      } else {
+        openText = "此案件原始報價已達 2000 以上，可視情況決定是否另收開針費。";
+      }
+
+      var total = M + openFee;
+      var rounded = Math.round(total / 100) * 100;
+      var deposit = Math.round(total * 0.3 / 100) * 100;
+
+      document.getElementById("resultCard").style.display = "block";
+
+      document.getElementById("resultTotal").textContent =
+        "原始計算報價（未含開針費）：$" + formatMoney(M);
+
+      document.getElementById("resultOpen").textContent = openText;
+
+      document.getElementById("resultRounded").textContent =
+        "（若含開針費）建議客人報價（四捨五入到百元）：$" +
+        formatMoney(rounded);
+
+      document.getElementById("resultDeposit").textContent =
+        "建議訂金（約三成）：$" + formatMoney(deposit);
+
+      var detail =
+        "圖案名稱：" + name + "\n" +
+        "尺寸：" + size.toFixed(1) + " cm²，比例：" + percent + "\n" +
+        "部位難度：" + partDiff +
+        "，複雜度：" + complexity +
+        "，寫實度：" + realism +
+        "，色彩：" + color +
+        "，改圖：" + redesign + "\n" +
+        "設計等級：" + design + "\n\n" +
+        "尺寸費用：$" + formatMoney(baseCost) + "\n" +
+        "部位加成：$" + formatMoney(partCost) + "\n" +
+        "施作加成（尺寸面積調整）：$" + formatMoney(diffCost) + "\n" +
+        "設計加成（設計面積調整）：$" + formatMoney(designCost) + "\n" +
+        "開針費參考：" + (openFee > 0 ? "$" + formatMoney(openFee) : "無（可自由決定）");
+
+      document.getElementById("resultDetail").textContent = detail;
+    }
+  </script>
+</body>
+</html>
