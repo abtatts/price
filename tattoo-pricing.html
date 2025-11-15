@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>刺青報價小工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui;
+      margin: 0;
+      padding: 16px;
+      background: #111;
+      color: #f5f5f5;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .sub {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #000;
+      color: #f5f5f5;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4f8cff;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+    .row > div {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #4f8cff, #7b5cff);
+      color: #fff;
+      margin-top: 4px;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .result-main {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .result-sub {
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+    .result-detail {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.4;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #333;
+      margin-left: 4px;
+      color: #ddd;
+    }
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .switch-row input[type="checkbox"] {
+      width: auto;
+      margin: 0 0 0 8px;
+    }
+    .small-note {
+      font-size: 11px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>刺青報價小工具</h1>
+  <div class="sub">公式參考你的 Excel：尺寸 × 80 ＋ 部位難度 / 施作 / 設計 × 300，自動加開針費。</div>
+
+  <!-- 基本資訊 -->
+  <div class="card">
+    <div class="card-title">基本資訊</div>
+    <label>
+      圖案名稱（選填）
+      <input id="name" type="text" placeholder="例如：上胸水母、芋圓背..." />
+    </label>
+
+    <div class="row">
+      <div>
+        <label>長（cm）</label>
+        <input id="length" type="number" inputmode="decimal" placeholder="可選填" />
+      </div>
+      <div>
+        <label>寬（cm）</label>
+        <input id="width" type="number" inputmode="decimal" placeholder="可選填" />
+      </div>
+    </div>
+
+    <label>
+      尺寸（面積，cm²）
+      <input id="size" type="number" inputmode="decimal" placeholder="可以手動填，或由長×寬帶入" />
+    </label>
+
+    <label>
+      尺寸比例（% → 用小數，例如 0.6）
+      <input id="percent" type="number" step="0.05" inputmode="decimal" value="0.6" />
+    </label>
+  </div>
+
+  <!-- 難度與設計 -->
+  <div class="card">
+    <div class="card-title">難度與設計參數 <span class="badge">和 Excel 對應</span></div>
+
+    <label>
+      部位難度（0～3 自訂）
+      <select id="partDiff">
+        <option value="0">0：一般</option>
+        <option value="1">1：稍難</option>
+        <option value="2">2：困難（例如背、大面積）</option>
+        <option value="3">3：非常困難</option>
+      </select>
+    </label>
+
+    <div class="row">
+      <div>
+        <label>複雜度（G 欄）</label>
+        <input id="complexity" type="number" inputmode="decimal" value="3" />
+      </div>
+      <div>
+        <label>寫實度（H 欄）</label>
+        <input id="realism" type="number" inputmode="decimal" value="0" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>色彩（I 欄）</label>
+        <input id="color" type="number" inputmode="decimal" value="0" />
+      </div>
+      <div>
+        <label>改圖（J 欄）</label>
+        <input id="redesign" type="number" inputmode="decimal" value="0" />
+      </div>
+    </div>
+
+    <label>
+      設計等級（K 欄 1～8，自訂）
+      <input id="design" type="number" inputmode="decimal" value="0" />
+    </label>
+    <div class="small-note">
+      對應 Excel 的：施作合計 = 複雜度 + 寫實度 + 色彩 + 改圖。<br>
+      尺寸面積調整 / 設計面積調整 會依「是否 &lt;150cm²」自動套公式。
+    </div>
+  </div>
+
+  <!-- 開針費設定 -->
+  <div class="card">
+    <div class="card-title">開針費設定</div>
+    <div class="switch-row">
+      <span>自動套用「總價低於 2000 開針費 1500」規則</span>
+      <label>
+        <input id="autoOpenFee" type="checkbox" checked />
+      </label>
+    </div>
+    <label>
+      手動開針費（關掉自動規則時才會套用）
+      <input id="openFee" type="number" inputmode="decimal" value="1500" />
+    </label>
+  </div>
+
+  <!-- 常數設定（可微調） -->
+  <div class="card">
+    <div class="card-title">計算常數（可調整）</div>
+    <div class="row">
+      <div>
+        <label>尺寸單價 B1（預設 80）</label>
+        <input id="constB1" type="number" inputmode="decimal" value="80" />
+      </div>
+      <div>
+        <label>尺寸門檻 D1（預設 150）</label>
+        <input id="constD1" type="number" inputmode="decimal" value="150" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>部位難度單價（預設 300）</label>
+        <input id="constPart" type="number" inputmode="decimal" value="300" />
+      </div>
+      <div>
+        <label>施作 / 設計單價（預設 300）</label>
+        <input id="constDiff" type="number" inputmode="decimal" value="300" />
+      </div>
+    </div>
+    <div class="small-note">
+      這裡對應你 Excel 第一列的 80、150、300、300。
+    </div>
+  </div>
+
+  <!-- 計算與結果 -->
+  <div class="card">
+    <button onclick="calculate()">計算報價</button>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-title">計算結果</div>
+    <div class="result-main" id="resultTotal"></div>
+    <div class="result-sub" id="resultRounded"></div>
+    <div class="result-sub" id="resultDeposit"></div>
+    <div class="result-detail" id="resultDetail"></div>
+  </div>
+
+  <script>
+    function num(id) {
+      var v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? 0 : v;
+    }
+
+    function formatMoney(x) {
+      return x.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function calculate() {
+      // 如果有填長跟寬，就自動算面積塞進 size
+      var length = num("length");
+      var width  = num("width");
+      if (length > 0 && width > 0) {
+        var area = length * width;
+        document.getElementById("size").value = area.toFixed(1);
+      }
+
+      var name      = document.getElementById("name").value || "未命名圖案";
+      var size      = num("size");     // B 欄
+      var percent   = num("percent");  // C 欄
+      var partDiff  = num("partDiff");// E 欄
+
+      var complexity = num("complexity"); // G
+      var realism    = num("realism");    // H
+      var color      = num("color");      // I
+      var redesign   = num("redesign");   // J
+      var design     = num("design");     // K
+
+      var B1         = num("constB1");    // 80
+      var D1         = num("constD1");    // 150
+      var unitPart   = num("constPart");  // 300
+      var unitDiff   = num("constDiff");  // 300
+      var unitDesign = num("constDiff");  // 同一個
+
+      if (size <= 0 || percent <= 0) {
+        alert("請至少填寫『尺寸』與『尺寸比例(%)』。");
+        return;
+      }
+
+      // === 對應 Excel ===
+      // F = 複雜度 + 寫實度 + 色彩 + 改圖
+      var totalDiff = complexity + realism + color + redesign;
+
+      // 尺寸面積調整 D = IF(B<150, F, B/D1 * F)
+      var sizeAdj, designAdj;
+      if (size < D1) {
+        sizeAdj   = totalDiff;
+        designAdj = design;
+      } else {
+        sizeAdj   = size / D1 * totalDiff;
+        designAdj = size / D1 * design;
+      }
+
+      // 基礎尺寸費用 = B * B1 * C
+      var baseCost   = size * B1 * percent;
+      // 部位難度費用 = E * unitPart
+      var partCost   = partDiff * unitPart;
+      // 施作加成 = 尺寸面積調整 * unitDiff
+      var diffCost   = sizeAdj * unitDiff;
+      // 設計加成 = 設計面積調整後 * unitDesign
+      var designCost = designAdj * unitDesign;
+
+      // M 合計 = 上面四個加總
+      var M = baseCost + partCost + diffCost + designCost;
+
+      // 開針費
+      var autoOpen   = document.getElementById("autoOpenFee").checked;
+      var openFeeManual = num("openFee");
+      var openFee;
+
+      if (autoOpen) {
+        // 對應你 Excel 註解：總價低於2000 開針費1500
+        openFee = (M > 0 && M < 2000) ? 1500 : 0;
+      } else {
+        openFee = openFeeManual;
+      }
+
+      // O 報價 = M + 開針費
+      var total = M + openFee;
+
+      // 額外提供：四捨五入到百元，跟建議訂金 30%
+      var rounded = Math.round(total / 100) * 100;
+      var deposit = Math.round(total * 0.3 / 100) * 100;
+
+      document.getElementById("resultCard").style.display = "block";
+      document.getElementById("resultTotal").textContent =
+        "原始計算報價：$" + formatMoney(total);
+      document.getElementById("resultRounded").textContent =
+        "建議客人報價（四捨五入到百元）：$" + formatMoney(rounded);
+      document.getElementById("resultDeposit").textContent =
+        "建議訂金（約三成）：$" + formatMoney(deposit);
+
+      var detail =
+        "圖案名稱： " + name + "\\n" +
+        "尺寸（cm²）： " + size.toFixed(1) + "，比例：" + percent + "\\n" +
+        "部位難度： " + partDiff + "，複雜度：" + complexity +
+        "，寫實度：" + realism + "，色彩：" + color + "，改圖：" + redesign + "\\n" +
+        "設計等級： " + design + "\\n\\n" +
+        "尺寸費用： $" + formatMoney(baseCost) + "\\n" +
+        "部位加成： $" + formatMoney(partCost) + "\\n" +
+        "施作加成（尺寸面積調整）： $" + formatMoney(diffCost) + "\\n" +
+        "設計加成（設計面積調整）： $" + formatMoney(designCost) + "\\n" +
+        "開針費： $" + formatMoney(openFee) + "（" +
+        (autoOpen ? "自動規則" : "手動輸入") + "）";
+
+      document.getElementById("resultDetail").textContent = detail;
+    }
+  </script>
+</body>
+</html>
