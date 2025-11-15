@@ -124,24 +124,49 @@
     <div class="card-title">基本資訊</div>
     <label>
       圖案名稱（選填）
-      <input id="name" type="text" placeholder="例如：上胸水母、芋圓背..." />
+      <input id="name" type="text" placeholder="例如：上胸水母..." />
     </label>
 
-    <div class="row">
-      <div>
-        <label>長（cm）</label>
-        <input id="length" type="number" inputmode="decimal" placeholder="可選填" />
-      </div>
-      <div>
-        <label>寬（cm）</label>
-        <input id="width" type="number" inputmode="decimal" placeholder="可選填" />
-      </div>
-    </div>
+   <div class="row">
+  <div>
+    <label>長（cm）</label>
+    <input id="length" type="number" inputmode="decimal" placeholder="可選填" oninput="updateAreaFromLengthWidth()" />
+  </div>
+  <div>
+    <label>寬（cm）</label>
+    <input id="width" type="number" inputmode="decimal" placeholder="可選填" oninput="updateAreaFromLengthWidth()" />
+  </div>
+</div>
 
-    <label>
-      尺寸（面積，cm²）
-      <input id="size" type="number" inputmode="decimal" placeholder="可以手動填，或由長×寬帶入" />
-    </label>
+<label>
+  尺寸（面積，cm²）
+  <input id="size" type="number" inputmode="decimal" placeholder="可手動填，或由長×寬帶入" />
+</label>
+
+<div class="small-note" id="areaHint" style="margin-top:-6px; margin-bottom:8px; color:#bbb; font-size:11px;">
+  自動計算面積：0 cm²
+</div>
+
+<script>
+  function num(id) {
+    var v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  function updateAreaFromLengthWidth() {
+    var length = num("length");
+    var width  = num("width");
+    var areaHint = document.getElementById("areaHint");
+
+    if (length > 0 && width > 0) {
+      var area = length * width;
+      document.getElementById("size").value = area.toFixed(1);
+      areaHint.textContent = "自動計算面積：" + area.toFixed(1) + " cm²";
+    } else {
+      areaHint.textContent = "自動計算面積：0 cm²";
+    }
+  }
+</script>
 
     <label>
       尺寸比例（% → 用小數，例如 0.6）
@@ -165,28 +190,28 @@
 
     <div class="row">
       <div>
-        <label>複雜度（G 欄）</label>
+        <label>複雜度（1~7 簡單線條、文字、煙霧水墨線、簡單物體、細節多、細節層次多、寫實）</label>
         <input id="complexity" type="number" inputmode="decimal" value="3" />
       </div>
       <div>
-        <label>寫實度（H 欄）</label>
+        <label>寫實度(1~5)</label>
         <input id="realism" type="number" inputmode="decimal" value="0" />
       </div>
     </div>
 
     <div class="row">
       <div>
-        <label>色彩（I 欄）</label>
+        <label>色彩（三瓶內：1、3~6：2、>6：3）</label>
         <input id="color" type="number" inputmode="decimal" value="0" />
       </div>
       <div>
-        <label>改圖（J 欄）</label>
+        <label>改圖（0~20）</label>
         <input id="redesign" type="number" inputmode="decimal" value="0" />
       </div>
     </div>
 
     <label>
-      設計等級（K 欄 1～8，自訂）
+      設計等級（1～8）
       <input id="design" type="number" inputmode="decimal" value="0" />
     </label>
     <div class="small-note">
